@@ -1,17 +1,56 @@
 """
+Classes inheriting from ValueABC should be used for type hinting,
+annotations, and sometimes type-checking.
+
+IE Functional-language type-checking, not OOP-style type checking
+Somewhat similar to the way that types are used in more functional languages.
+
+Pythonicaly, when used as a type-annotation in a docstring annotation, the class implied
+should bear the right methods (~as an interface), but it can ALSO be used as part of:
+    isinstance(obj, value_interface)
+... to confirm that the value is correct.
+
+Pythonically, what it DOES NOT do:
+Check the value when you create it. Value/type checking must be done explictly.
+
+@todo: Consider removing ValueABC
+@todo: Consider removing the instances contained here (ExistingFile, ExistingDirectory, PositiveInteger) - to their own files
+@todo: Determine: Will ValueABC.__instancecheck__ classmethod will disrupt the ValueMeta.__instancecheck__ ?
 """
 import abc
-
+import os
 
 class ValueMeta(abc.ABCMeta):
     """
-    ~ABCMeta, but allows __instancecheck__ to be cleanly overwritten.
-    @todo: Copy this into an interface-related package
+    Classes inheriting from ValueABC should be used for type hinting,
+    annotations, and sometimes type-checking.
+
+    IE Functional-language type-checking, not OOP-style type checking
+    Somewhat similar to the way that types are used in more functional languages.
+
+    Pythonicaly, when used as a type-annotation in a docstring annotation, the class implied
+    should bear the right methods (~as an interface), but it can ALSO be used as part of:
+        isinstance(obj, value_interface)
+    ... to confirm that the value is correct.
+
+    Pythonically, what it DOES NOT do:
+    Check the value when you create it. Value/type checking must be done explictly.
+
+    @todo: Determine: Will ValueABC.__instancecheck__ classmethod will disrupt the ValueMeta.__instancecheck__ ?
     """
 
     def __instancecheck__(cls, instance):
-        if hasattr(cls, '__instancecheck__'):
 
+        print()
+        print(cls.__instancecheck__, ValueMeta.__instancecheck__)
+        print(cls.__instancecheck__ == ValueMeta.__instancecheck__)
+        print(cls.__dict__['__instancecheck__'], ValueMeta.__dict__['__instancecheck__'])
+        import pdb
+        pdb.set_trace()
+        print()
+
+        if hasattr(cls, '__instancecheck__'):
+            #if (cls.__instancecheck__ == ValueMeta.__instancecheck__):
             return cls.__instancecheck__(instance)
         else:
             return abc.ABCMeta.__instancecheck__(cls, instance)
@@ -26,7 +65,6 @@ class ValueMeta(abc.ABCMeta):
     # This should be method on the class descendants of value-interface,
     # ... but not appear on the instances of that class
     def _assert(cls, instance, **keywords):
-        a;lsdjkfa;slfj;asdlkfja;sdlfkjasdlfjasdlfkjasd;fkasjdf;lkasjdf;laskdjf;alsdkjf;alskfj;aslkfja;lkj
 
         # Chain: keyword, cls attribute, default
         exc_type = keywords.get('exception',
@@ -35,7 +73,7 @@ class ValueMeta(abc.ABCMeta):
 
         getattr(cls, 'exception')
         if not isinstance(instance, cls):
-            exc_type = getattr(cls, 'exception', default=InterfaceAssertionError)
+            exc_type = getattr(cls, 'exception', default=ValueABCAssertionError)
             raise exc_type(str.format(
                 "Invalid"
             ))
@@ -86,7 +124,7 @@ class ValueABC(object):
 
 # Examples
 class ExistingDirectory(str):
-    __metaclass__ = ValueABC
+    __metaclass__ = ValueMeta
 
     @classmethod
     def __instancecheck__(cls, instance):
@@ -97,6 +135,7 @@ class ExistingDirectory(str):
 
 
 class PositiveInteger(int):
+    __metaclass__ = ValueMeta
     @classmethod
     def __instancecheck__(cls, instance):
         if isinstance(instance, int):
