@@ -21,15 +21,10 @@ class InterfaceWrapper(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, instance):
-        support.validate_instance(instance, self.AbstractParent,
+        support.validate_instance(
+            instance, self.AbstractParent,
             exception=support.InterfaceTypeError
         )
-        # if not issubclass(instance, self.AbstractParent):
-        #     raise support.InterfaceTypeError(str.format(
-        #         "Object of type '{0}' does not meet interface {1}",
-        #         type(instance).__name__,
-        #         getattr(self.AbstractParent, "__name__", "")
-        #     ))
         self._wrapped = instance
     def __repr__(self):
         if hasattr(self._wrapped, '__repr__'):
@@ -44,52 +39,60 @@ class InterfaceWrapper(object):
     AbstractParent = abc.abstractproperty(lambda *args, **kwargs: NotImplemented)
 
 
-class Sequence(collections.Sequence, InterfaceWrapper):
-    AbstractParent = collections.Sequence
-    # Re-implement abstract methods - referencing self._wrapped
-    def __getitem__(self, key):
-        return self._wrapped.__getitem__(key)
-    def __len__(self):
-        return self._wrapped.__len__()
+# class Hashable(collections.Hashable, InterfaceWrapper):
+#     AbstractParent = collections.Hashable
+#     def __hash__(self):
+#         return self._wrapped.__hash__()
 
 
-class MutableSequence(collections.MutableSequence, InterfaceWrapper):
-    AbstractParent = collections.MutableSequence
-    # Re-implement abstract methods - referencing self._wrapped
-    def __getitem__(self, key):
-        return self._wrapped.__getitem__(key)
-    def __len__(self):
-        return self._wrapped.__len__()
-    def __setitem__(self, key, value):
-        return self._wrapped.__setitem__(key, value)
-    def __delitem__(self, key):
-        return self._wrapped.__delitem__(key)
-    def insert(self, index, value):
-        return self._wrapped.insert(index, value)
+# class Sequence(collections.Sequence, InterfaceWrapper):
+#     AbstractParent = collections.Sequence
+#     # Re-implement abstract methods - referencing self._wrapped
+#     def __getitem__(self, key):
+#         return self._wrapped.__getitem__(key)
+#     def __len__(self):
+#         return self._wrapped.__len__()
 
 
-class Mapping(collections.Mapping, InterfaceWrapper):
-    AbstractParent = collections.Mapping
-    def __getitem__(self, key):
-        return self._wrapped.__getitem__(key)
-    def __iter__(self):
-        return self._wrapped.__iter__()
-    def __len__(self):
-        return self._wrapped.__len__()
+# class MutableSequence(collections.MutableSequence, InterfaceWrapper):
+#     AbstractParent = collections.MutableSequence
+#     # Re-implement abstract methods - referencing self._wrapped
+#     def __getitem__(self, key):
+#         return self._wrapped.__getitem__(key)
+#     def __len__(self):
+#         return self._wrapped.__len__()
+#     def __setitem__(self, key, value):
+#         return self._wrapped.__setitem__(key, value)
+#     def __delitem__(self, key):
+#         return self._wrapped.__delitem__(key)
+#     def insert(self, index, value):
+#         return self._wrapped.insert(index, value)
 
 
-class MutableMapping(collections.Mapping, InterfaceWrapper):
-    AbstractParent = collections.MutableMapping
-    def __getitem__(self, key):
-        return self._wrapped.__getitem__(key)
-    def __iter__(self):
-        return self._wrapped.__iter__()
-    def __len__(self):
-        return self._wrapped.__len__()
-    def __setitem__(self, key, value):
-        return self._wrapped.__setitem__(key, value)
-    def __delitem__(self, key):
-        return self._wrapped.__delitem__(key)
+# class Mapping(collections.Mapping, InterfaceWrapper):
+#     AbstractParent = collections.Mapping
+#     def __getitem__(self, key):
+#         return self._wrapped.__getitem__(key)
+#     def __iter__(self):
+#         return self._wrapped.__iter__()
+#     def __len__(self):
+#         return self._wrapped.__len__()
+
+
+# class MutableMapping(collections.Mapping, InterfaceWrapper):
+#     AbstractParent = collections.MutableMapping
+#     def __getitem__(self, key):
+#         return self._wrapped.__getitem__(key)
+#     def __iter__(self):
+#         return self._wrapped.__iter__()
+#     def __len__(self):
+#         return self._wrapped.__len__()
+#     def __setitem__(self, key, value):
+#         return self._wrapped.__setitem__(key, value)
+#     def __delitem__(self, key):
+#         return self._wrapped.__delitem__(key)
+
+
 
 
 def construct_interfacewrapper(interface, cls_name=None):
@@ -137,3 +140,16 @@ def wrapper_property(name):
         delattr(self._wrapped)
 
     return property(wrap_get, wrap_set, wrap_del)
+
+
+Hashable = construct_interfacewrapper(collections.Hashable)
+Iterable = construct_interfacewrapper(collections.Iterable)
+Iterator = construct_interfacewrapper(collections.Iterator)
+Sized = construct_interfacewrapper(collections.Container)
+Callable = construct_interfacewrapper(collections.Callable)
+Set = construct_interfacewrapper(collections.Set)
+MutableSet = construct_interfacewrapper(collections.MutableSet)
+Mapping = construct_interfacewrapper(collections.Mapping)
+MutableMapping = construct_interfacewrapper(collections.MutableMapping)
+Sequence = construct_interfacewrapper(collections.Sequence)
+MutableSequence = construct_interfacewrapper(collections.MutableSequence)
