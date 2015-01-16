@@ -49,14 +49,14 @@ class ValueMeta(abc.ABCMeta):
         pdb.set_trace()
         print()
 
-        if hasattr(cls, '__instancecheck__'):
+        if _hasattr(cls, '__instancecheck__'):
             #if (cls.__instancecheck__ == ValueMeta.__instancecheck__):
             return cls.__instancecheck__(instance)
         else:
             return abc.ABCMeta.__instancecheck__(cls, instance)
 
     def __subclasscheck__(cls, subclass):
-        if hasattr(cls, '__subclasscheck__'):
+        if _hasattr(cls, '__subclasscheck__'):
             return cls.__subclasscheck__(subclass)
         else:
             return abc.ABCMeta.__subclasscheck__(cls, subclass)
@@ -78,6 +78,14 @@ class ValueMeta(abc.ABCMeta):
                 "Invalid"
             ))
 
+
+
+def _hasattr(C, attr):
+    try:
+        return any(attr in B.__dict__ for B in C.__mro__)
+    except AttributeError:
+        # Old-style class
+        return hasattr(C, attr)
 
 class abstractclassmethod(classmethod):
 
