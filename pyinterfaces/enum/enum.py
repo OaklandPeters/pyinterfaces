@@ -1,19 +1,10 @@
 """
-Creates Enumerator style data types, supporting pattern-matching.
-
-@todo: Rebuild this to be as close to a Mapping as possible. HOWEVER __iter__ should return values, not keys
-@todo: SequencedEnumerant - which has a '_order_' method specifying order to check/iter non-fallback cases.
-@todo: Make __eq__ magic method for cases. Think about inheritance, etc
-@todo: Add capabilities to Enumerant to (optionally) set subtype/validity checking for Cases it accepts (_casecheck_ method)
-
+TEMP MESSAGE: Version of enumerant, but which avoids need for metaclasses
+by operating on instances.
 
 """
 import abc
 import re
-
-from . import iterclass
-
-from . import classproperty
 
 __all__ = [
     'CaseInterface',
@@ -26,9 +17,10 @@ __all__ = [
 
 class CaseInterface(object):
     __metaclass__ = abc.ABCMeta
-    __init__ = abc.abstractmethod(lambda self, *args, **kwargs: NotImplemented)
-    __contains__ = abc.abstractmethod(lambda self, *args, **kwargs: NotImplemented)
-
+    __abstractmethods__ = [
+        '__init__',
+        '__contains__'
+    ]
 
 class RegexCase(CaseInterface):
     def __init__(self, pattern):
