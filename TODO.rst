@@ -1,0 +1,2 @@
+- Rename ValueMeta/ValueABC --> TypeCheckable and TypeCheckable
+    - Will require changing imports from sibling packages (clswrap and metatype)
