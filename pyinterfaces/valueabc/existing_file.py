@@ -1,12 +1,15 @@
 import os
 
+import six
+
 from valuemeta import ValueMeta
 
+@six.add_metaclass(ValueMeta)
 class ExistingFile(str):
     """
     Non-instanced type-checking class (a VOG).
     """
-    __metaclass__ = ValueMeta
+    #__metaclass__ = ValueMeta
     def __init__(self, value):
         cls = type(self)
         if not cls.__instancecheck__(value):
