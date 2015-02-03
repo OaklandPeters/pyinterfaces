@@ -13,12 +13,14 @@ should bear the right methods (~as an interface), but it can ALSO be used as par
 Pythonically, what it DOES NOT do:
 Check the value when you create it. Value/type checking must be done explictly.
 
-@todo: Consider removing ValueABC
+@todo: ValueMeta can get caught in recursive loops. See if it is possible to more cleanly prevent this.
 @todo: Consider removing the instances contained here (ExistingFile, ExistingDirectory, PositiveInteger) - to their own files
 @todo: Determine: Will ValueABC.__instancecheck__ classmethod will disrupt the ValueMeta.__instancecheck__ ?
 """
 import abc
 import os
+
+import six
 
 class ValueMeta(abc.ABCMeta):
     """
@@ -40,15 +42,6 @@ class ValueMeta(abc.ABCMeta):
     """
 
     def __instancecheck__(cls, instance):
-
-        print()
-        print(cls.__instancecheck__, ValueMeta.__instancecheck__)
-        print(cls.__instancecheck__ == ValueMeta.__instancecheck__)
-        print(cls.__dict__['__instancecheck__'], ValueMeta.__dict__['__instancecheck__'])
-        import pdb
-        pdb.set_trace()
-        print()
-
         if _hasattr(cls, '__instancecheck__'):
             #if (cls.__instancecheck__ == ValueMeta.__instancecheck__):
             return cls.__instancecheck__(instance)
@@ -64,6 +57,8 @@ class ValueMeta(abc.ABCMeta):
     # ! INTENT is...
     # This should be method on the class descendants of value-interface,
     # ... but not appear on the instances of that class
+    # 
+    # ... can I achieve this via a classmethod on the metaclass?
     def _assert(cls, instance, **keywords):
 
         # Chain: keyword, cls attribute, default
