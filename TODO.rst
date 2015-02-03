@@ -1,2 +1,5 @@
 - Rename ValueMeta/ValueABC --> TypeCheckable and TypeCheckable
     - Will require changing imports from sibling packages (clswrap and metatype)
+- Decide if ABCView should actually be located inside ducktype.
+- metatypes/ needs unittests. Also... test inheritance.
+- Have metatypes/ use metaclasses (maybe ValueMeta), so that Union() produces classes, not instances (and issubclass(Union(list, tuple), collections.Sequence) becomes valid). Perhaps this can be done via __new__ instead of metaclasses.

@@ -1,6 +1,6 @@
 """
 Provides ValueMeta metaclass - which allows its descendants to override
-__instancecheck__ and __subclasscheck__.
+__instancecheck__ and __subclasscheck__ to be used as *classmethods*
 """
 from __future__ import absolute_import
 
