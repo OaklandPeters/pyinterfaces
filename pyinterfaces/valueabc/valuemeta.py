@@ -131,8 +131,9 @@ class ValueABC(object):
 
 
 # Examples
+@six.add_metaclass(ValueMeta)
 class ExistingDirectory(str):
-    __metaclass__ = ValueMeta
+    # __metaclass__ = ValueMeta
 
     @classmethod
     def __instancecheck__(cls, instance):
@@ -141,9 +142,9 @@ class ExistingDirectory(str):
                 return True
         return False
 
-
+@six.add_metaclass(ValueMeta)
 class PositiveInteger(int):
-    __metaclass__ = ValueMeta
+    # __metaclass__ = ValueMeta
     @classmethod
     def __instancecheck__(cls, instance):
         if isinstance(instance, int):
