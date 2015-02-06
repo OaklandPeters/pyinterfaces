@@ -15,8 +15,8 @@ class InterfaceType(object):
     #__metaclass__ = valuemeta.ValueMeta
     @classmethod
     def __instancecheck__(cls, instance):
-        return meets.meets(instance, cls)
+        return meets(instance, cls)
     @classmethod
     def __subclasscheck__(cls, subclass):
-        return meets.meets(subclass, cls)
+        return meets(subclass, cls)
 

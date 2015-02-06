@@ -45,7 +45,7 @@ class AnyTestCase(unittest.TestCase):
 
 class TargetedTestCase(unittest.TestCase):
     def test_basic(self):
-        self.assertTrue(issubclass(Union(list), list))
+        self.assertFalse(issubclass(Union(list, tuple), list))
 
 
 # class UnionTestCase(unittest.TestCase):
@@ -124,6 +124,31 @@ class TargetedTestCase(unittest.TestCase):
 
     #     with self.assertRaises(TypeError):
     #         issubclass(MyClass(), combined)
+    #     
+    #     self.assertFalse(issubclass(combined, list))
+    #     self.assertFalse(issubclass(combined, tuple))
+    #     self.assertFalse(issubclass(combined, (tuple, list))
+    def test_union_to_union(self):
+        base = Union(list, tuple, str)
+        smaller = Union(list, tuple)
+        larger = Union(list, tuple, str, dict)
+        overlap = Union(list, tuple, set)
+        nonoverlap = Union(dict, bool)
+
+        self.assert(issubclass(base, smaller))
+        self.assert(issubclass(smaller, base))
+
+        self.assert(issubclass(base, larger))
+        self.assert(issubclass(larger, base))
+
+        self.assert(issubclass(base, overlap))
+        self.assert(issubclass(overlap, base))
+
+        self.assert(issubclass(base, nonoverlap))
+        self.assert(issubclass(nonoverlap, base))
+
+
+    #     self.assertTrue(issubclass(combined, Union(list, tuple, )))
 
 
 # class ReverseTestCase(unittest.TestCase):

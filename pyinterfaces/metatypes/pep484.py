@@ -3,13 +3,30 @@
 Self Note: ... I don't think this actually needs ValueMeta/ValueABC, because
 it can just have Any/Union be instances
 
+
+NEW PRINCIPLE:
+subclass comparison, converts both into sets(), and asks approximately:
+    my_types = set(cls._types)
+    other_types = set(getattr(subclass, '_types', []))
+    return set(cls._types) <= set(subclass)
+
+
+@todo: Write supporting 'type-set' class, which is not the old categories, but a simpler child of Set()
+
 @todo: Decide if Tuple and tuple should have an 'virtual' (abc.register) relationship.
+@todo: Inside Union, flatten input Union arguments
+@todo: Inside Union convert None-->NoneType
+@todo: Consider making Union iterable
 """
 import abc
 import types
+import collections
+import itertools
 
 from ..valueabc.valueabc import ValueABC
-from .shared import TypeLogic
+#from .shared import TypeLogic
+from .typeset import TypeSet
+from .meta import MetaTypeMetaClass
 
 __all__ = [
     'Any',
@@ -17,8 +34,10 @@ __all__ = [
     'Optional'
 ]
 
+class MetaType(object):
+    pass
 
-class Any(ValueABC):
+class Any(ValueABC, MetaType):
     """
     Back port of typing.Any from PEP 483, into pyinterfaces/ 2.7 implementation.
     This version of `Any` differs in some major ways. For example, this version
@@ -45,6 +64,48 @@ class Any(ValueABC):
                 "'subclass' must be a class."
             ))
         return True
+
+
+class TypeLogic(TypeSet, MetaType):
+    __metaclass__ = MetaTypeMetaClass
+    @classmethod
+    def __subclasscheck__(cls, subclass):
+        subclass_set = TypeSet(subclass)
+        return subclass_set <= cls
+    @classmethod
+    def __instancecheck__(cls, instance):
+        return any(
+
+        )
+
+class Union(TypeSet):
+    #_types = abstractproperty()
+    __metaclass__ = UnionMeta
+    def __new__(cls, *utypes):
+
+        _types = _validate_utypes(utypes)
+        TypeUnion = type(
+            'TypeUnion',
+            (Union, ),
+            {'_types': _types}
+        )
+        return TypeUnion
+    @classmethod
+    def __instancecheck__(cls, instance):                
+        return any(
+            isinstance(instance, _type)
+            for _type in cls._types
+        )
+    @classmethod
+    def __subclasscheck__(cls, subclass):
+        return any(
+            issubclass(subclass, _type)
+            for _type in cls._types
+        )
+
+
+
+
 
 
 class UnionMeta(type):
@@ -117,11 +178,62 @@ class UnionMeta(type):
             return cls.__subclasscheck__(subclass)
         return NotImplemented
 
+    def __repr__(cls):
+        return str.format(
+            "<'{0}': {1}>",
+            cls.__name__, repr(getattr(cls, 'utypes', ''))
+        )
 
 
 class Union(object):
+    #_types = abstractproperty()
     __metaclass__ = UnionMeta
-    def __new__(cls, *_types):
+    def __new__(cls, *utypes):
+
+        _types = _validate_utypes(utypes)
+        TypeUnion = type(
+            'TypeUnion',
+            (Union, ),
+            {'_types': _types}
+        )
+        return TypeUnion
+    @classmethod
+    def __instancecheck__(cls, instance):                
+        return any(
+            isinstance(instance, _type)
+            for _type in cls._types
+        )
+    @classmethod
+    def __subclasscheck__(cls, subclass):
+        return any(
+            issubclass(subclass, _type)
+            for _type in cls._types
+        )
+
+
+class aUnion(MetaType):
+    __metaclass__ = UnionMeta
+    def __new__(cls, *_types):        
+        """
+        """
+        if len(_types) == 0:
+            _types = set([Any])
+
+
+        _types = _validate_utypes(utypes)
+        # Implicit else....
+        
+        MyUnion = type('MyUnion', (BaseUnion, ), {'_types': _types})
+
+        print()
+        print("MyUnion:", type(MyUnion), MyUnion)
+        print()
+        import pdb
+        pdb.set_trace()
+        print()
+        
+
+        
         class TypeUnion(Union):
             @classmethod
             def __instancecheck__(cls, instance):                
@@ -135,10 +247,28 @@ class Union(object):
                     issubclass(subclass, _type)
                     for _type in cls._types
                 )
-        if len(_types) == 0:
-            _types = tuple([Any])
         TypeUnion._types = _types  # pylint: disable=W0212
         return TypeUnion
+
+
+        # namespace = {
+        #     '__instancecheck__': __instancecheck__,
+        #     '__subclasscheck__': __subclasscheck__,
+        #     'utypes': utypes
+        # }
+        # self = type(name, utypes, )
+    # @classmethod
+    # def __instancecheck__(cls, instance):                
+    #     return any(
+    #         isinstance(instance, _type)
+    #         for _type in cls._types
+    #     )
+    # @classmethod
+    # def __subclasscheck__(cls, subclass):
+    #     return any(
+    #         issubclass(subclass, _type)
+    #         for _type in cls._types
+    #     )
 
 
 
@@ -316,3 +446,68 @@ def _hasattr(C, attr):
     except AttributeError:
         # Old-style class
         return hasattr(C, attr)
+
+def _unfold_unions(utypes):
+    """
+    @todo: Type check that all utypes are types
+    """
+    for utype in utypes:
+        if hasattr(utype, '_types'):
+            for _type in utype._types:
+                yield _type
+        else:
+            yield utype
+
+def _validate_utypes(utypes):
+    if len(utypes) == 0:
+        utypes = tuple([Any])
+    # Unfold any nested Unions
+    _types_iter = _unfold_unions(utypes)
+    # Validate input
+    _validated = (_validate_type(_type) for _type in _types_iter)
+    _types = tuple(_validated)
+
+    if len(_types) == 1:
+        return _types[0]
+    else:
+        return _types
+
+def _validate_type(_type):
+    """
+    @type: _type: Any
+    @rtype: type
+    """
+    if isinstance(_type, types.NoneType):
+        return types.NoneType
+    if not isinstance(_type, type):
+        raise TypeError(str.format(
+            "Object must be a type, not '{0}'",
+            type(_type).__name__
+        ))
+    return _type
+
+def _validate_types(_types):
+    """
+    @type: _types: Union[Sequence, ]
+    @rtype: Any
+    """
+    return map_preserving(_validate_type, _types)
+
+def map_preserving(function, iterable):
+    """Semi-type preserving map function.
+    To work, the constructor of the type of 'iterable'
+    must accept an iterator as input. Iterators are returned as
+    a generic iterator.
+    So this will mostly work for iterators and built-in types
+    (tuple, list, dict).
+    @type: function: Callable
+    @type: iterable: Iterable
+    @rtype: Any
+    """
+    iterator = itertools.imap(function, iterable)
+    if isinstance(iterable, collections.Iterator):
+        return iterator
+    else:
+        # Try the
+        return type(iterable)(iterator)
+
