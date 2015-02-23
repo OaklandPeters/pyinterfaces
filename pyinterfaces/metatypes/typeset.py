@@ -15,6 +15,13 @@ __all__ = [
     'subclass_comparison'
 ]
 
+class TypeLogicInterface(collections.MutableSet):
+    __contains__
+    __iter__
+    __len__
+    add
+    remove
+
 class TypeSet(collections.MutableSet):
     """
     Set-class, used by Union and Optional.
