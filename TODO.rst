@@ -1,13 +1,18 @@
 Refactoring
 -------------
+- Rename metatypes/ --> typelogic/
+- setlogic/ replaced with the independent package: funkylogic/
 - Rename ValueMeta/ValueABC --> TypeCheckable and TypeCheckable
     - Will require changing imports from sibling packages (clswrap and metatype)
 
 Functionality
 --------------
+- enum: Quick rebuild to follow usage templates in ENUM_USAGE.py and ENUM_STUBS.py
+- metatypes: Logical portion implemented via funkylogic/
 - metatypes: Allow Union to accept 'None', and validate it into NoneType.
 - metatypes: Simplification inside Union: Union(single)-->single
 - metatypes: Simplification inside Union: Union(A, Union(B, C))-->Union(A, B, C)
+
 
 Packaging
 -----------
