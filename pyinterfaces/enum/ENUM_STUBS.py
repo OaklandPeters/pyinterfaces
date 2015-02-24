@@ -88,21 +88,25 @@ class Enumerator(object):
         EnumeratorMeta.__setattr__(self, name, value)
 
 
-class classproperty(property):
-    """Provides a getter-property for classmethods. Due to complicated reasons,
-    there is no way to make classmethod setter-properties work in Python (2)
-    """
-    def __get__(self, cls, owner):
-        return self.fget.__get__(None, owner)()
-
-
 class Enumeratee(basic_property.BasicProperty):
     """
     Descriptor, similar to property
     """
-    def __get__(self, cls, owner):
-    def __eq__(self, other):
+    def __init__(self, data):
+        self.data = data
 
+    def __eq__(self, other):
+        return (self.data == other)
+
+    def __str__(self):
+        return str(self.data)
+
+    def __repr__(self):
+        return str.format(
+            "<{typename}: {data}>",
+            typename=type(self).__name__,
+            data=repr(self.data)
+        )
 
 
 def enumeratee(getter, setter=None, deleter=None, doc=None):

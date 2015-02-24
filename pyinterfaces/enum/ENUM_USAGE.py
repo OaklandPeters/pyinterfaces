@@ -28,10 +28,10 @@ import ENUM_STUBS as enum
 
 class Beatles(enum.Enumerator):
 
-    John = enum.enumeratee(lambda self: "John Lennon")
-    Paul = enum.enumeratee(lambda self: "Paul McCartney")
-    George = enum.enumeratee(lambda self: "George Harrison")
-    Ringo = enum.enumeratee(lambda self: "Ringo Starr")
+    John = enum.Enumeratee("John Lennon")
+    Paul = enum.Enumeratee("Paul McCartney")
+    George = enum.Enumeratee("George Harrison")
+    Ringo = enum.Enumeratee("Ringo Starr")
 
     @classmethod
     def __iter__(cls):
