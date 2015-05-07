@@ -1,5 +1,7 @@
 """
 Abstract parent-class. Inheritable (ie this bears the metaclass)
+
+@todo: Consider making this defined by being ABC with a nonempty __abstractmethods__.
 """
 
 import abc
